@@ -3,12 +3,13 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) =>{
     sequelize.define('Tipo',{
         // ID :{
-        //     type: DataTypes.INTEGER,
-        //     // defaultValue: DataTypes.UUIDV4,
-        //     // primaryKey: true,
+        //     type: DataTypes.UUID,
+        //     defaultValue: DataTypes.UUIDV4,
+        //     allowNull: false,
+        //     primaryKey: true,
 
         // },
-        name: {
+        Nombre: {
             type: DataTypes.STRING(20),
         }
     })

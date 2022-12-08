@@ -2,26 +2,30 @@ const { Router } = require("express");
 const { Tipo } = require("../db.js");
 const router = Router();
 
-router.get("/", (req, res) => {
-    // fetch("https://pokeapi.co/api/v2/type")
-    //   .then((response) => response.json())
-    //   .then((typeList) => res.status(200).send(typeList.results))
-    //   .catch((error) => console.log(error));
+const getType = async () => {
+  const response = await fetch("https://pokeapi.co/api/v2/type");
+  const arr = await response.json();
+  const typeList = arr.results.map((type) => {
+    return {
+      Nombre: type.name,
+    };
+  });
+  return typeList;
+};
 
-    // Tipo.sync({force:true});
+router.get("/", async (req, res) => {
+  const giveType = await getType();
 
-  //este de abajo sirve pero le falta
+  giveType.forEach((type) => {
+    Tipo.findOrCreate({
+      where: {
+        Nombre: type.Nombre,
+      },
+    });
+  });
 
-  fetch("https://pokeapi.co/api/v2/type")
-    .then((response) => response.json())
-    .then((arr) => arr.results)
-    .then(data => Tipo.bulkCreate(data))
-    .then((data) => {Tipo.sync({alter:true})
-      return res.send(data);
-    })
-    .catch((error) => console.log(error));
-
-
+  const allTypes = await Tipo.findAll();
+  return res.status(200).send(allTypes);
 });
 
 module.exports = router;

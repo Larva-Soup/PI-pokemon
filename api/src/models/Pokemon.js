@@ -33,8 +33,10 @@ module.exports = (sequelize) => {
     Peso:{
       type: DataTypes.FLOAT,
     },
-    /* Gender:{
-      type: DataTypes.ENUM("Male/Female", "Only Males", "Only Females", "None")
-    } */
+    CustomCreation:{
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    }
   });
 };
