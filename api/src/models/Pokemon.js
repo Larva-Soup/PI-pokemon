@@ -15,7 +15,7 @@ module.exports = (sequelize) => {
       allowNull: false,
     },
     Vida: {
-      type: DataTypes.STRING(30),
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     Ataque: {

@@ -4,6 +4,7 @@ const { Pokemon, Tipo } = require("../db.js");
 // const Tipo = require("../models/Tipo");
 const router = Router();
 
+//getPokeList tendría que ser el que maneja el pokeList.next de la respuesta
 const getPokeList = async () => {
   const res = await fetch(`https://pokeapi.co/api/v2/pokemon/`);
   const pokeList = await res.json();
@@ -33,19 +34,21 @@ const getApi = async (param) => {
   }
 };
 
-const getDbEntry = async (param) => {
-  return await Pokemon.findOne({
+const getDbByQuery = async (param) => {
+  const queryPoke = await Pokemon.findAll({
     where: {
-      [Op.or]: [{ Nombre: param }, { ID: param }],
+      Nombre: param,
     },
-    include:{
+    include: {
       model: Tipo,
-      attributes: ['name'],      //puede que sea necesario cambiar el nombre si cambio Tipo
+      attributes: ["Nombre"],
       through: {
         attributes: [],
-      }
-    }
+      },
+    },
   });
+  if (queryPoke.length < 1) return Promise.reject();
+  return queryPoke;
 };
 
 const getDb = async () => {
@@ -53,17 +56,33 @@ const getDb = async () => {
 };
 
 const catchEmAll = async () => {
-  const pokeApiList = await getPokeList();
-  const pokeDataBase = await getDb();
-  const pokeAll = [...pokeApiList, ...pokeDataBase];
-  return pokeAll;
+  const [pokeOne, pokeTwo] = await Promise.all([getPokeList(), getDb()]);
+  return [...pokeOne, ...pokeTwo];
 };
 
 const catchEmSome = async (param) => {
-  const pokeApi = await getApi(param);
-  const dataBase = await getDbEntry(param);
-  return pokeApi || dataBase;
+  try {
+    const catched = await Promise.any([getDbByQuery(param), getApi(param)]);
+    return catched;
+  } catch (error) {
+    throw new Error("El pokémon no existe o no se ha catalogado");
+  }
 };
+
+const getId = async(param) => {
+  return await Pokemon.findByPk(param)
+}
+
+const getByParams = async(param) => {
+  try {
+    return await Promise.any([getApi(param), getId(param)])
+    
+  } catch (error) {
+    throw new Error("El pokémon no existe o no se ha catalogado")
+  }
+}
+
+
 
 router.get("/", async (req, res) => {
   const { name } = req.query;
@@ -71,9 +90,11 @@ router.get("/", async (req, res) => {
     if (name) {
       const pokemonByName = await catchEmSome(name);
       return res.status(200).send(pokemonByName);
+    } else {
+      const list = await catchEmAll();
+      return res.status(200).send(list);
     }
-    const list = await catchEmAll();
-    return res.status(200).send(list);
+    //probar sin el else luego
   } catch (error) {
     return res.status(404).send(error.message);
   }
@@ -82,13 +103,47 @@ router.get("/", async (req, res) => {
 router.get("/:idPokemon", async (req, res) => {
   const { idPokemon } = req.params;
   try {
-    const pokemonById = await getApi(idPokemon);
+    const pokemonById = await getByParams(idPokemon);
     return res.status(200).send(pokemonById);
   } catch (error) {
     return res.status(404).send(error.message);
   }
 });
 
-router.post("/", (req, res) => {});
+router.post("/", async (req, res) => {
+  const {
+    Nombre,
+    Vida,
+    Ataque,
+    Defensa,
+    Velocidad,
+    Altura,
+    Peso,
+    CustomCreation, //revisar luego como corre sin este declarado
+    Tipos,
+  } = req.body;
+  const pokeNew = await Pokemon.create({
+    Nombre,
+    Vida,
+    Ataque,
+    Defensa,
+    Velocidad,
+    Altura,
+    Peso,
+    CustomCreation,
+  });
+
+  // console.log(pokeNew)
+
+  let typeDb = await Tipo.findAll({
+    where: {
+      Nombre: Tipos /* Tipos.map(type => type) */, //esto es infiriendo que llega como un array
+      //porque un pokemon puede tener dos tipos
+    },
+  });
+
+  pokeNew.addTipo(typeDb);
+  res.send("Pokémon creado con éxito");
+});
 
 module.exports = router;
