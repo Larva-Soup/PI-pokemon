@@ -25,6 +25,7 @@ const getApi = async (param) => {
       Ataque: pokeList.stats[1].base_stat,
       Defensa: pokeList.stats[2].base_stat,
       Velocidad: pokeList.stats[5].base_stat,
+      Tipos: pokeList.types.map((ele) => ele.type.name),
       //falta ataque (stats[3]) y defensa especial (stats[4])
       //pero no los pide y los puedo poner luego
     };
@@ -69,20 +70,17 @@ const catchEmSome = async (param) => {
   }
 };
 
-const getId = async(param) => {
-  return await Pokemon.findByPk(param)
-}
+const getId = async (param) => {
+  return await Pokemon.findByPk(param);
+};
 
-const getByParams = async(param) => {
+const getByParams = async (param) => {
   try {
-    return await Promise.any([getApi(param), getId(param)])
-    
+    return await Promise.any([getApi(param), getId(param)]);
   } catch (error) {
-    throw new Error("El pokémon no existe o no se ha catalogado")
+    throw new Error("El pokémon no existe o no se ha catalogado");
   }
-}
-
-
+};
 
 router.get("/", async (req, res) => {
   const { name } = req.query;
@@ -133,14 +131,7 @@ router.post("/", async (req, res) => {
     CustomCreation,
   });
 
-  // console.log(pokeNew)
-
-  let typeDb = await Tipo.findAll({
-    where: {
-      Nombre: Tipos /* Tipos.map(type => type) */, //esto es infiriendo que llega como un array
-      //porque un pokemon puede tener dos tipos
-    },
-  });
+  const typeDb = await Tipo.findAll({ where: { Nombre: Tipos } });
 
   pokeNew.addTipo(typeDb);
   res.send("Pokémon creado con éxito");
