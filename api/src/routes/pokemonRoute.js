@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const { Op } = require("sequelize");
+const fetch = require('node-fetch')
 const { Pokemon, Tipo } = require("../db.js");
-// const Tipo = require("../models/Tipo");
 const router = Router();
 
 //getPokeList tendría que ser el que maneja el pokeList.next de la respuesta
@@ -117,7 +117,7 @@ router.post("/", async (req, res) => {
     Velocidad,
     Altura,
     Peso,
-    CustomCreation, //revisar luego como corre sin este declarado
+    CustomCreation, 
     Tipos,
   } = req.body;
   const pokeNew = await Pokemon.create({

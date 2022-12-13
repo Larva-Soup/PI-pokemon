@@ -1,10 +1,12 @@
 const { Router } = require("express");
 const { Tipo } = require("../db.js");
+const fetch = require("node-fetch");
 const router = Router();
 
 const getType = async () => {
   const response = await fetch("https://pokeapi.co/api/v2/type");
   const arr = await response.json();
+
   const typeList = arr.results.map((type) => {
     return {
       Nombre: type.name,
