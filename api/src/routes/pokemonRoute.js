@@ -35,6 +35,8 @@ const getPokeList = async () => {
         Nombre: res.name,
         Tipos: res.types.map(el => el.type.name),
         Imagen: res.sprites.other["official-artwork"].front_default,
+        Id: res.id,
+        // key: res.id,
       }
       pokeBox.push(pokeInd)
     }
@@ -59,6 +61,7 @@ const getApi = async (param) => {
       Velocidad: pokeList.stats[5].base_stat,
       Tipos: pokeList.types.map((ele) => ele.type.name),
       Imagen: pokeList.sprites.other["official-artwork"].front_default,
+      // key: pokeList.id,
       //falta ataque (stats[3]) y defensa especial (stats[4])
       //pero no los pide y los puedo poner luego
     };
