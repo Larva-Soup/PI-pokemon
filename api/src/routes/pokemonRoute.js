@@ -1,14 +1,26 @@
 const { Router } = require("express");
 const { Op } = require("sequelize");
-const fetch = require('node-fetch')
+const fetch = require("node-fetch");
 const { Pokemon, Tipo } = require("../db.js");
 const router = Router();
 
 //getPokeList tendría que ser el que maneja el pokeList.next de la respuesta
+//recordar descomentar en la request
 const getPokeList = async () => {
   const res = await fetch(`https://pokeapi.co/api/v2/pokemon/`);
   const pokeList = await res.json();
-  return pokeList.results;
+  let lista = [...pokeList.results];
+  let aux = pokeList.next;
+
+  //loop 2 veces para 60 pokemon
+  for (let i = 0; i < 2; i++) {
+    const temp = await fetch(aux);
+    const results = await temp.json();
+    lista = [...lista, ...results.results];
+    aux = results.next;
+  }
+
+  return lista;
 };
 
 const getApi = async (param) => {
@@ -26,6 +38,7 @@ const getApi = async (param) => {
       Defensa: pokeList.stats[2].base_stat,
       Velocidad: pokeList.stats[5].base_stat,
       Tipos: pokeList.types.map((ele) => ele.type.name),
+      Imagen: pokeList.sprites.other.official_artwork.front_default,
       //falta ataque (stats[3]) y defensa especial (stats[4])
       //pero no los pide y los puedo poner luego
     };
@@ -90,6 +103,7 @@ router.get("/", async (req, res) => {
       return res.status(200).send(pokemonByName);
     } else {
       const list = await catchEmAll();
+
       return res.status(200).send(list);
     }
     //probar sin el else luego
@@ -117,7 +131,7 @@ router.post("/", async (req, res) => {
     Velocidad,
     Altura,
     Peso,
-    CustomCreation, 
+    CustomCreation,
     Tipos,
   } = req.body;
   const pokeNew = await Pokemon.create({
