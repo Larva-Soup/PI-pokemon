@@ -6,5 +6,5 @@ export const GET_TYPES = "GET_TYPES";
 
 //server
 
-export const urlServer = "localhost:3001";
+export const urlServer = "http://localhost:3001";
 
