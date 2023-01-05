@@ -6,7 +6,7 @@ const router = Router();
 
 //getPokeList tendría que ser el que maneja el pokeList.next de la respuesta
 //recordar descomentar en la request
-const getPokeList = async () => {
+const getPokeListFirst = async () => {
   const res = await fetch(`https://pokeapi.co/api/v2/pokemon/`);
   const pokeList = await res.json();
   let lista = [...pokeList.results];
@@ -23,6 +23,26 @@ const getPokeList = async () => {
   return lista;
 };
 
+const getPokeList = async () => {
+  const lista = await getPokeListFirst();
+  const pokeBox = []
+  try {
+    for(const poke of lista){
+      const resJson = await fetch(poke.url)
+      const res = await resJson.json();
+
+      const pokeInd = {
+        Nombre: res.name,
+        Tipos: res.types.map(el => el.type.name),
+        Imagen: res.sprites.other["official-artwork"].front_default,
+      }
+      pokeBox.push(pokeInd)
+    }
+    return pokeBox;
+  } catch (error) {
+  }
+}
+
 const getApi = async (param) => {
   try {
     let aux = param.toLowerCase();
@@ -38,7 +58,7 @@ const getApi = async (param) => {
       Defensa: pokeList.stats[2].base_stat,
       Velocidad: pokeList.stats[5].base_stat,
       Tipos: pokeList.types.map((ele) => ele.type.name),
-      Imagen: pokeList.sprites.other.official_artwork.front_default,
+      Imagen: pokeList.sprites.other["official-artwork"].front_default,
       //falta ataque (stats[3]) y defensa especial (stats[4])
       //pero no los pide y los puedo poner luego
     };
