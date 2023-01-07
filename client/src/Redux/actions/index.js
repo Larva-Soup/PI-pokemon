@@ -5,6 +5,9 @@ import {
   REMOVE_POKEMON,
   GET_TYPES,
   urlServer,
+  FILTER_BY_TYPE,
+  FILTER_CUSTOM,
+  ORDER_BY_NAME,
 } from "../../utils";
 
 
@@ -15,6 +18,27 @@ export const getAll = () => {
     return dispatch({ type: GET_POKEMON_LIST, payload: list });
   };
 };
+
+export const filterPokesByType = (payload) => {
+  return {
+    type: FILTER_BY_TYPE,
+    payload
+  }
+}
+
+export const filterCustoms = (payload) => {
+  return {
+    type: FILTER_CUSTOM,
+    payload
+  }
+}
+
+export const nameOrderer = (payload) => {
+  return {
+    type: ORDER_BY_NAME,
+    payload
+  }
+}
 
 // export const getDetail = (param) => {
 //   return function (dispatch) {

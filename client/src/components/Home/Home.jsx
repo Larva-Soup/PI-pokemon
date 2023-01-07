@@ -1,27 +1,42 @@
-// import React from "react"
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAll } from "../../Redux/actions";
+import { getAll, filterPokesByType, filterCustoms } from "../../Redux/actions";
 import { Link } from "react-router-dom";
 import Card from "../Card/Card";
+import Paginado from "../Paginado/Paginado";
 
 export default function Home() {
   const dispatch = useDispatch();
   const allPokemon = useSelector((state) => state.pokemonList);
-  // const { paginado, setPaginado } = useState(1);
-  // const { pokemonPerPage, setPokemonPerPage } = useState(12);
-  // const lastPokeIndex = paginado * pokemonPerPage;
-  // const firstPokeIndex = pokemonPerPage * lastPokeIndex;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pokemonPerPage, setPokemonPerPage] = useState(12);
+  const lastPokeIndex = currentPage * pokemonPerPage;
+  const firstPokeIndex = lastPokeIndex - pokemonPerPage;
+  const currentPokemons = allPokemon.slice(firstPokeIndex, lastPokeIndex);
+
+  const paginado = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   //types necesita ser inicializado también o no se guardan los tipos de los pokemon custom
   useEffect(() => {
     dispatch(getAll());
-  }, []);
+  }, [dispatch]);
 
   const handleClick = (e) => {
     e.preventDefault();
     dispatch(getAll());
   };
+
+  const handleTypeFilter = (e) => {
+    e.preventDefault();
+    dispatch(filterPokesByType(e.target.value))
+  }
+
+  const handleCustomFilter = (e) => {
+    e.preventDefault();
+    dispatch(filterCustoms(e.target.value))
+  }
 
   return (
     <div>
@@ -35,7 +50,7 @@ export default function Home() {
         Volver a cargar los pokemones
       </button>
       <div>
-        <select>
+        <select onChange={e => handleTypeFilter(e)}>
           <option value="all">Todos</option>
           {/* {state.types.map(type => 
             (<option value = {type}>{type}</option>)
@@ -60,7 +75,7 @@ export default function Home() {
           <option value="dark">Dark</option>
           <option value="fairy">Fairy</option>
         </select>
-        <select>
+        <select onChange={e => handleCustomFilter(e)}>
           <option value="all">Todos</option>
           <option value="original">Existente</option>
           <option value="custom">Creado</option>
@@ -69,17 +84,23 @@ export default function Home() {
           <option value="asc">Ascendente</option>
           <option value="desc">Descendente</option>
         </select>
+          
+        <Paginado
+          pokemonPage={pokemonPerPage}
+          allPokemon={allPokemon.length}
+          paginado={paginado}
+        />
 
-        {allPokemon &&
-          allPokemon.map((pokemon) => (
+        {currentPokemons && currentPokemons.map((pokemon) => (
             <Card
               name={pokemon.Nombre}
               image={pokemon.Imagen}
               types={pokemon.Tipos}
-              key={pokemon.Id}
+              id={pokemon.Id}
             />
           ))}
       </div>
     </div>
   );
+  
 }

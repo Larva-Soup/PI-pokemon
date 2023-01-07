@@ -8,3 +8,9 @@ export const GET_TYPES = "GET_TYPES";
 
 export const urlServer = "http://localhost:3001";
 
+//filters
+
+export const FILTER_BY_TYPE = "FILTER_BY_TYPE";
+export const FILTER_CUSTOM = "FILTER_CUSTOM";
+export const ORDER_BY_NAME = "ORDER_BY_NAME";
+
